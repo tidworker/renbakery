@@ -1,0 +1,79 @@
+[
+  {
+    "keywords": [
+      "chonyobin"
+    ],
+    "name": "蔥油餅",
+    "price": 20
+  },
+  {
+    "keywords": [
+      "masihkabanghungdou",
+      "masihkabang"
+    ],
+    "name": "馬斯卡邦紅豆",
+    "price": 75
+  },
+  {
+    "keywords": [
+      "manyuemeiruluobeiguo",
+      "manyuemeiruluo"
+    ],
+    "name": "蔓越莓乳酪貝果",
+    "price": 75
+  },
+  {
+    "keywords": [
+      "siaoputaoganbeiguo",
+      "siaoputaogan"
+    ],
+    "name": "小葡萄乾貝果",
+    "price": 60
+  },
+  {
+    "keywords": [
+      "hungdoumianbao",
+      "hungdou"
+    ],
+    "name": "紅豆麵包",
+    "price": 45
+  },
+  {
+    "keywords": [
+      "chulusiannaitusih",
+      "siannaitusih"
+    ],
+    "name": "初鹿鮮奶吐司",
+    "price": 140
+  },
+  {
+    "keywords": [
+      "heitangboluo"
+    ],
+    "name": "黑糖菠蘿",
+    "price": 45
+  },
+  {
+    "keywords": [
+      "nonghouheijhihmatusih",
+      "nonghouheijhihma"
+    ],
+    "name": "濃厚黑芝麻吐司",
+    "price": 190
+  },
+  {
+    "keywords": [
+      "beihaidaoruluota",
+      "beihaidaoruluo"
+    ],
+    "name": "北海道乳酪塔",
+    "price": 80
+  },
+  {
+    "keywords": [
+      "yisihcueibing"
+    ],
+    "name": "義式脆餅",
+    "price": 120
+  }
+]
