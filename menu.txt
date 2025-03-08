@@ -75,5 +75,12 @@
     ],
     "name": "義式脆餅",
     "price": 120
+  },
+  {
+    "keywords": [
+      "cie"
+    ],
+    "name": "切",
+    "price": 0
   }
 ]
