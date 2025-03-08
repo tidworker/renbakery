@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>中文點餐系統</title>
+  <title>Ren bakery 語音點餐系統</title>
   <style>
     body { font-family: Arial, sans-serif; margin: 10px; padding: 0; }
     input, button { margin: 5px; padding: 10px; font-size: 16px; }
@@ -46,13 +46,13 @@
   </style>
 </head>
 <body>
-  <h1>中文點餐系統</h1>
+  <h1>Ren bakery 語音點餐系統</h1>
   
   <!-- 點餐區 -->
   <section>
     <h2>請輸入訂單內容（或直接使用語音輸入）</h2>
     <!-- 範例形式：a3/2/b、3/a2/b、a3/b2/、3/a/b2 -->
-    <input type="text" id="orderInput" placeholder="例如：a3/2/b 或 3/a2/b">
+    <input type="text" id="orderInput" placeholder="紅豆麵包一顆">
     <button onclick="orderFromChinese()">送出訂單</button>
     <button onclick="startContinuousVoiceInput()">語音輸入</button>
     <button onclick="resetOrder()">重置點餐</button>
@@ -65,7 +65,7 @@
     <table id="orderTable">
       <thead>
         <tr>
-          <th>菜品</th>
+          <th>品項</th>
           <th>份數</th>
           <th>備註</th>
           <th>單價</th>
