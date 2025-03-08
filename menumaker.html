@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>中文點餐系統</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 10px;
+      padding: 0;
+    }
+    input, button, textarea {
+      margin: 5px;
+      padding: 10px;
+      font-size: 16px;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+    li {
+      cursor: pointer;
+      padding: 5px;
+      border-bottom: 1px solid #ddd;
+    }
+    li:hover {
+      background-color: #f0f0f0;
+    }
+    @media (max-width: 600px) {
+      input, button, textarea { font-size: 18px; }
+    }
+    /* Modal 樣式 */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.4);
+    }
+    .modal-content {
+      background-color: #fefefe;
+      margin: 15% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 90%;
+      max-width: 500px;
+    }
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .close:hover,
+    .close:focus {
+      color: black;
+      text-decoration: none;
+    }
+    .form-group {
+      margin-bottom: 10px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+    }
+    .form-group input {
+      width: 100%;
+      box-sizing: border-box;
+    }
+    /* 每筆中文輸入欄位的容器 */
+    .chinese-field {
+      display: flex;
+      align-items: center;
+      margin-bottom: 5px;
+    }
+    .chinese-field input {
+      flex: 1;
+    }
+    .chinese-field button {
+      margin-left: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>中文點餐系統</h1>
+
+  <!-- 點餐區 -->
+  <section>
+    <h2>請輸入中文菜品名稱1.3</h2>
+    <input type="text" id="orderInput" placeholder="例如：蔥油餅">
+    <button onclick="orderFromChinese()">送出訂單</button>
+    <!-- 新增語音輸入按鈕 -->
+    <button onclick="startVoiceInput()">語音輸入</button>
+    <p>訂單結果：<span id="orderResult"></span></p>
+  </section>
+
+  <!-- 轉譯字庫載入狀態 -->
+  <section>
+    <h2>轉譯字庫載入狀態</h2>
+    <p id="dbStatus">尚未載入字庫資料...</p>
+  </section>
+
+  <!-- 菜單管理區 -->
+  <section>
+    <h2>菜單管理</h2>
+    <button onclick="openMenuModal()">新增菜單</button>
+    <button onclick="downloadMenuData()">下載菜單資料</button>
+    <button onclick="document.getElementById('uploadMenuFile').click()">上傳菜單資料</button>
+    <input type="file" id="uploadMenuFile" accept=".txt" style="display:none;" onchange="uploadMenuData()">
+    <div id="menuList"></div>
+  </section>
+
+  <!-- 新增/編輯菜單彈出視窗：包含【餐點名稱】、【中文輸入】（可新增多筆欄位）與【金額】 -->
+  <div id="menuModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeMenuModal()">&times;</span>
+      <h3 id="modalTitle">新增菜單項目</h3>
+      <div class="form-group">
+        <label for="menuName">餐點名稱：</label>
+        <input type="text" id="menuName" placeholder="例如：蔥油餅">
+      </div>
+      <div class="form-group">
+        <label>中文輸入（可多筆）：</label>
+        <div id="menuChineseContainer">
+          <!-- 初始建立一個中文輸入欄位 -->
+          <div class="chinese-field">
+            <input type="text" class="menuChineseInput" placeholder="輸入中文進行轉碼">
+            <button onclick="removeChineseField(this)">刪除</button>
+          </div>
+        </div>
+        <button onclick="addChineseField()">新增欄位</button>
+      </div>
+      <div class="form-group">
+        <label for="menuPrice">金額：</label>
+        <input type="number" id="menuPrice" placeholder="例如：20">
+      </div>
+      <button id="saveButton" onclick="saveMenuItem()">確定</button>
+      <button onclick="closeMenuModal()">取消</button>
+    </div>
+  </div>
+
+  <script>
+    // 全域資料：字庫與菜單
+    let groupMapping = {};
+    let charMapping = {};
+    // 菜單資料結構：每個項目含有 keywords 陣列、name 與 price
+    let menu = [
+      { keywords: ["chonyobin"], name: "蔥油餅", price: 20 }
+    ];
+    let currentEditingIndex = null;
+
+    // 讀取轉譯字庫，資料庫編寫方式與原本相同
+    function loadTranslationDatabase() {
+      fetch("database.txt")
+        .then(response => {
+          if (!response.ok) throw new Error("無法讀取 database.txt");
+          return response.text();
+        })
+        .then(text => {
+          const db = JSON.parse(text);
+          if (db.groupMapping && db.charMapping) {
+            groupMapping = db.groupMapping;
+            charMapping = db.charMapping;
+            document.getElementById("dbStatus").innerText = "字庫資料載入成功！";
+          } else {
+            document.getElementById("dbStatus").innerText = "database.txt 格式不正確！";
+          }
+        })
+        .catch(err => {
+          document.getElementById("dbStatus").innerText = "載入字庫資料失敗：" + err.message;
+        });
+    }
+    loadTranslationDatabase();
+
+    // 更新菜單列表，顯示關鍵字、餐點名稱與金額
+    function updateMenuDisplay() {
+      const menuListDiv = document.getElementById("menuList");
+      menuListDiv.innerHTML = "";
+      const ul = document.createElement("ul");
+      menu.forEach((item, index) => {
+        const li = document.createElement("li");
+        li.textContent = `[${item.keywords.join(", ")}] : ${item.name} - ${item.price} 元`;
+        li.onclick = () => openMenuModal(index);
+        ul.appendChild(li);
+      });
+      menuListDiv.appendChild(ul);
+    }
+    updateMenuDisplay();
+
+    // 新增中文輸入欄位
+    function addChineseField() {
+      const container = document.getElementById("menuChineseContainer");
+      const div = document.createElement("div");
+      div.className = "chinese-field";
+      div.innerHTML = '<input type="text" class="menuChineseInput" placeholder="輸入中文進行轉碼">' +
+                      '<button onclick="removeChineseField(this)">刪除</button>';
+      container.appendChild(div);
+    }
+
+    // 刪除指定的中文輸入欄位
+    function removeChineseField(btn) {
+      const fieldDiv = btn.parentNode;
+      fieldDiv.parentNode.removeChild(fieldDiv);
+    }
+
+    // 開啟新增/編輯菜單視窗
+    function openMenuModal(index = null) {
+      currentEditingIndex = index;
+      const modal = document.getElementById("menuModal");
+      modal.style.display = "block";
+      const container = document.getElementById("menuChineseContainer");
+      container.innerHTML = ""; // 清空現有欄位
+      if (index !== null) {
+        document.getElementById("modalTitle").innerText = "編輯菜單項目";
+        const item = menu[index];
+        document.getElementById("menuName").value = item.name;
+        document.getElementById("menuPrice").value = item.price;
+        // 依據現有 keywords 建立多筆中文輸入欄位
+        item.keywords.forEach(keyword => {
+          const div = document.createElement("div");
+          div.className = "chinese-field";
+          div.innerHTML = `<input type="text" class="menuChineseInput" value="${keyword}" placeholder="輸入中文進行轉碼">
+                           <button onclick="removeChineseField(this)">刪除</button>`;
+          container.appendChild(div);
+        });
+        // 若沒有關鍵字，則預設建立一個空欄位
+        if (item.keywords.length === 0) {
+          addChineseField();
+        }
+      } else {
+        document.getElementById("modalTitle").innerText = "新增菜單項目";
+        document.getElementById("menuName").value = "";
+        document.getElementById("menuPrice").value = "";
+        addChineseField();
+      }
+    }
+
+    // 關閉菜單視窗
+    function closeMenuModal() {
+      document.getElementById("menuModal").style.display = "none";
+      currentEditingIndex = null;
+    }
+
+    // 新增或更新菜單項目：依據所有中文輸入欄位利用字庫轉碼生成多組關鍵字
+    function saveMenuItem() {
+      const name = document.getElementById("menuName").value.trim();
+      const price = parseFloat(document.getElementById("menuPrice").value.trim());
+      if (!name || isNaN(price)) {
+        alert("請填寫完整且正確的資料！");
+        return;
+      }
+      // 取得所有中文輸入欄位的值，分別轉碼後組成關鍵字陣列
+      const inputFields = document.getElementsByClassName("menuChineseInput");
+      let keywords = [];
+      for (let field of inputFields) {
+        const chineseInput = field.value.trim();
+        if (chineseInput) {
+          let converted = "";
+          for (let i = 0; i < chineseInput.length; i++) {
+            const ch = chineseInput.charAt(i);
+            if (charMapping[ch] !== undefined) {
+              converted += charMapping[ch];
+            }
+          }
+          converted = converted.toLowerCase();
+          if (converted) {
+            keywords.push(converted);
+          }
+        }
+      }
+      if (keywords.length === 0) {
+        alert("請至少輸入一筆可轉碼的中文資料！");
+        return;
+      }
+      const newItem = { keywords, name, price };
+      if (currentEditingIndex !== null) {
+        menu[currentEditingIndex] = newItem;
+      } else {
+        // 檢查是否已有重複關鍵字（只檢查每個新關鍵字是否與現有菜單中的任一關鍵字重複）
+        for (let item of menu) {
+          for (let key of item.keywords) {
+            if (keywords.includes(key)) {
+              alert("已有相同關鍵字的菜單項目！");
+              return;
+            }
+          }
+        }
+        menu.push(newItem);
+      }
+      updateMenuDisplay();
+      closeMenuModal();
+    }
+
+    // 點餐功能：使用者輸入中文後經字庫轉碼比對菜單中的關鍵字
+    function orderFromChinese() {
+      const input = document.getElementById("orderInput").value.trim();
+      if (!input) {
+        alert("請輸入中文菜品名稱！");
+        return;
+      }
+      let converted = "";
+      for (let i = 0; i < input.length; i++) {
+        const ch = input.charAt(i);
+        if (charMapping[ch] !== undefined) {
+          converted += charMapping[ch];
+        }
+      }
+      converted = converted.toLowerCase();
+      // 精確比對各菜單項目中的關鍵字
+      let foundDish = menu.find(item => item.keywords.includes(converted));
+      if (foundDish) {
+        document.getElementById("orderResult").innerText =
+          `您點的是 ${foundDish.name}，金額為 ${foundDish.price} 元`;
+      } else {
+        // 如未精確命中則採用得分推薦
+        const bestMatch = findBestMatch(converted);
+        if (bestMatch) {
+          document.getElementById("orderResult").innerText =
+            `推薦您點：${bestMatch.item.name} （得分：${bestMatch.score}），金額為 ${bestMatch.item.price} 元`;
+        } else {
+          document.getElementById("orderResult").innerText = "未找到相似菜品！";
+        }
+      }
+    }
+
+    // 積分算法：計算輸入與每個菜單項目各關鍵字匹配的得分
+    function findBestMatch(input) {
+      let bestItem = null;
+      let bestScore = 0;
+      menu.forEach(item => {
+        item.keywords.forEach(keyword => {
+          const score = letterMatchScore(input, keyword);
+          if (score > bestScore) {
+            bestScore = score;
+            bestItem = item;
+          }
+        });
+      });
+      return bestItem ? { item: bestItem, score: bestScore } : null;
+    }
+    function letterMatchScore(input, target) {
+      let score = 0;
+      for (let char of target) {
+        if (input.indexOf(char) >= 0) {
+          score++;
+        }
+      }
+      return score;
+    }
+
+    // 下載菜單資料（以 JSON 格式存成 menu.txt）
+    function downloadMenuData() {
+      const dataStr = JSON.stringify(menu, null, 2);
+      const blob = new Blob([dataStr], { type: "text/plain" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "menu.txt";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    // 上傳菜單資料
+    function uploadMenuData() {
+      const fileInput = document.getElementById("uploadMenuFile");
+      if (fileInput.files.length === 0) return;
+      const file = fileInput.files[0];
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const data = JSON.parse(e.target.result);
+          if (Array.isArray(data)) {
+            menu = data;
+            updateMenuDisplay();
+            alert("菜單資料上傳成功！");
+          } else {
+            alert("上傳的菜單資料格式不正確！");
+          }
+        } catch (err) {
+          alert("上傳失敗：" + err.message);
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    // 語音輸入功能（使用 Web Speech API）
+    function startVoiceInput() {
+      if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+        alert("您的瀏覽器不支援語音輸入功能。");
+        return;
+      }
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const recognition = new SpeechRecognition();
+      recognition.lang = 'zh-TW';
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+      recognition.start();
+      recognition.onresult = function(event) {
+        const transcript = event.results[0][0].transcript;
+        document.getElementById("orderInput").value = transcript;
+        orderFromChinese();
+      };
+      recognition.onerror = function(event) {
+        alert("語音輸入發生錯誤：" + event.error);
+      };
+    }
+  </script>
+</body>
+</html>
