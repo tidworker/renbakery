@@ -1,13 +1,6 @@
 [
   {
     "keywords": [
-      "chonyobin"
-    ],
-    "name": "蔥油餅",
-    "price": 20
-  },
-  {
-    "keywords": [
       "masihkabanghungdou",
       "masihkabang"
     ],
