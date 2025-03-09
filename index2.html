@@ -97,7 +97,6 @@
       { "keywords": ["la"], "name": "辣", "price": 0 }
     ];
     
-    // 載入字庫與菜單（如有外部檔案，可使用 fetch 載入）
     function loadTranslationDatabase() {
       fetch("database.txt")
         .then(response => {
@@ -236,21 +235,14 @@
          recognition.lang = 'zh-TW';
          recognition.interimResults = false;
          recognition.maxAlternatives = 1;
-         // 等待 3000 毫秒
-         let timeoutId = setTimeout(() => { 
-            recognition.abort();
-            currentRecognition = null;
-            resolve(null);
-         }, 3000);
+         // 刪除原有 3 秒機制，等待語音輸入直到有結果為止
          recognition.onresult = function(event) {
-            clearTimeout(timeoutId);
             currentRecognition = null;
             resolve(event.results[0][0].transcript);
          };
          recognition.onerror = function(event) {
-            clearTimeout(timeoutId);
             currentRecognition = null;
-            resolve(null);
+            resolve("");
          };
          recognition.start();
       });
@@ -259,11 +251,6 @@
     function startVoiceInputLoop() {
       if (orderingComplete) return;
       startVoiceInputSingle().then(transcript => {
-         // 若在 3 秒內未收到輸入（null 或空字串），則立即完成點餐
-         if (transcript === null || transcript.trim() === "") {
-            completeOrder();
-            return;
-         }
          transcript = transcript.trim();
          if (transcript === "完成") {
             completeOrder();
@@ -272,25 +259,23 @@
          if (transcript === "錯誤") {
             const tbody = document.getElementById("orderTable").getElementsByTagName("tbody")[0];
             if (tbody.rows.length > 0) { tbody.deleteRow(tbody.rows.length - 1); }
-            completeOrder();
+            startVoiceInputLoop();
             return;
          }
          let orders = processMultipleVoiceInput(transcript);
-         if (orders.length === 0) {
-            completeOrder();
-         } else {
+         if (orders.length > 0) {
             orders.forEach(order => {
               addOrderRow(order.dish, order.quantity, "");
             });
             calculateTotal();
-            showMenuModalContent(); // 更新模態框中菜單數量顯示
-            // 成功處理一筆點餐後，等待 3 秒再重新啟動語音輸入
-            setTimeout(() => { startVoiceInputLoop(); }, 3000);
          }
+         showMenuModalContent(); // 更新模態框中菜單的數量顯示
+         // 重新啟動語音輸入，不設延遲
+         startVoiceInputLoop();
       });
     }
     
-    // 完成點餐後，立即中止語音錄音、不再接收其他音訊，並將訂單表格文字設為黑色
+    // 按下「完成點餐」時，立即中止語音錄音且不再接收其他音訊，並將表格文字設為黑色
     function completeOrder() {
       orderingComplete = true;
       if (currentRecognition) {
