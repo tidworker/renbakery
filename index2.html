@@ -85,18 +85,15 @@
   </div>
   
   <script>
-    // 全域變數
+    // 全域變數：字庫、菜單與其他用變數
     let charMapping = {};
     let groupMapping = {};
     let orderingComplete = false; // 點餐完成旗標
     let currentRecognition = null; // 語音辨識物件
-    // 範例菜單（可從外部檔案載入）
-    let menu = [
-      { "keywords": ["chonyobin", "bujiadan", "bujia"], "name": "蔥油餅", "price": 20 },
-      { "keywords": ["chonyobinjiadan", "danbin", "jiadan", "la"], "name": "蔥油餅加蛋", "price": 30 },
-      { "keywords": ["la"], "name": "辣", "price": 0 }
-    ];
+    // 移除內建範例菜單，菜單資料將由外部檔案 menu.txt 載入
+    let menu = [];
     
+    // 載入字庫資料
     function loadTranslationDatabase() {
       fetch("database.txt")
         .then(response => {
@@ -114,6 +111,7 @@
     }
     loadTranslationDatabase();
     
+    // 載入菜單資料，menu.txt 必須存在且格式正確
     function loadMenu() {
       fetch("menu.txt")
         .then(response => {
@@ -128,7 +126,7 @@
     }
     loadMenu();
     
-    // 僅轉換在字庫中有對應的字元
+    // 轉譯函式：僅轉換在字庫中有對應的字元
     function translateDishName(dishChinese) {
       let converted = "";
       for (let i = 0; i < dishChinese.length; i++) {
@@ -235,7 +233,6 @@
          recognition.lang = 'zh-TW';
          recognition.interimResults = false;
          recognition.maxAlternatives = 1;
-         // 刪除原有 3 秒機制，等待語音輸入直到有結果為止
          recognition.onresult = function(event) {
             currentRecognition = null;
             resolve(event.results[0][0].transcript);
@@ -270,7 +267,7 @@
             calculateTotal();
          }
          showMenuModalContent(); // 更新模態框中菜單的數量顯示
-         // 重新啟動語音輸入，不設延遲
+         // 直接重新啟動語音輸入
          startVoiceInputLoop();
       });
     }
