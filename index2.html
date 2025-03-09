@@ -85,13 +85,13 @@
   </div>
   
   <script>
-    // 全域變數：字庫、菜單與其他用變數
+    // 全域變數
     let charMapping = {};
     let groupMapping = {};
     let orderingComplete = false; // 點餐完成旗標
     let currentRecognition = null; // 語音辨識物件
-    // 菜單資料將由外部檔案 (menu.txt) 載入，這裡初始為空
-    let menu = [];
+    let menu = [];  // 菜單資料將從外部檔案載入
+    let menuModalTimer = null;  // 用於模態框閒置計時
     
     // 載入字庫資料
     function loadTranslationDatabase() {
@@ -111,7 +111,7 @@
     }
     loadTranslationDatabase();
     
-    // 從外部檔案載入菜單資料
+    // 載入菜單資料
     function loadMenu() {
       fetch("menu.txt")
         .then(response => {
@@ -213,6 +213,14 @@
       showMenuModalContent();
     }
     
+    /* ---------- 模態框自動關閉相關 ---------- */
+    function resetMenuModalTimer() {
+      if (menuModalTimer) clearTimeout(menuModalTimer);
+      menuModalTimer = setTimeout(() => {
+        closeMenuModal();
+      }, 6000);
+    }
+    
     /* ---------- 語音輸入流程 ---------- */
     function startContinuousVoiceInput() {
       orderingComplete = false;
@@ -267,7 +275,9 @@
             calculateTotal();
          }
          showMenuModalContent(); // 更新模態框中菜單的數量顯示
-         // 直接重新啟動語音輸入，直到使用者按下完成點餐
+         // 每次語音輸入後重置模態框閒置計時
+         resetMenuModalTimer();
+         // 重新啟動語音輸入
          startVoiceInputLoop();
       });
     }
@@ -292,10 +302,15 @@
     function openMenuModal() {
       showMenuModalContent();
       document.getElementById("menuModal").style.display = "block";
+      resetMenuModalTimer();
     }
     
     function closeMenuModal() {
       document.getElementById("menuModal").style.display = "none";
+      if (menuModalTimer) {
+        clearTimeout(menuModalTimer);
+        menuModalTimer = null;
+      }
     }
     
     // 取得訂單中該品項的數量
@@ -327,7 +342,7 @@
           }
           dishDiv.style.padding = "5px";
           dishDiv.style.cursor = "pointer";
-          dishDiv.onclick = function() { selectDish(dish, dishDiv); };
+          dishDiv.onclick = function() { selectDish(dish, dishDiv); resetMenuModalTimer(); };
           container.appendChild(dishDiv);
         }
       });
