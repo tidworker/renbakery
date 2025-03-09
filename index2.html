@@ -90,7 +90,7 @@
     let groupMapping = {};
     let orderingComplete = false; // 點餐完成旗標
     let currentRecognition = null; // 語音辨識物件
-    // 移除內建範例菜單，菜單資料將由外部檔案 menu.txt 載入
+    // 菜單資料將由外部檔案 (menu.txt) 載入，這裡初始為空
     let menu = [];
     
     // 載入字庫資料
@@ -111,7 +111,7 @@
     }
     loadTranslationDatabase();
     
-    // 載入菜單資料，menu.txt 必須存在且格式正確
+    // 從外部檔案載入菜單資料
     function loadMenu() {
       fetch("menu.txt")
         .then(response => {
@@ -267,12 +267,12 @@
             calculateTotal();
          }
          showMenuModalContent(); // 更新模態框中菜單的數量顯示
-         // 直接重新啟動語音輸入
+         // 直接重新啟動語音輸入，直到使用者按下完成點餐
          startVoiceInputLoop();
       });
     }
     
-    // 按下「完成點餐」時，立即中止語音錄音且不再接收其他音訊，並將表格文字設為黑色
+    // 按下「完成點餐」時，立即中止語音錄音且關閉模態框，並將表格文字設為黑色
     function completeOrder() {
       orderingComplete = true;
       if (currentRecognition) {
@@ -310,7 +310,7 @@
       return 0;
     }
     
-    // 更新模態框中菜單項目的顯示，格式為「品項×數字」
+    // 更新模態框中菜單項目的顯示，格式為「品項×數字 - 單價元」
     function showMenuModalContent() {
       const container = document.getElementById("menuItems");
       container.innerHTML = "";
@@ -319,10 +319,10 @@
           let qty = getOrderQuantity(dish.name);
           let dishDiv = document.createElement("div");
           if (qty > 0) {
-            dishDiv.innerText = dish.name + "×" + qty;
+            dishDiv.innerText = dish.name + "×" + qty + " - " + dish.price + "元";
             dishDiv.style.color = "red";
           } else {
-            dishDiv.innerText = dish.name;
+            dishDiv.innerText = dish.name + " - " + dish.price + "元";
             dishDiv.style.color = "black";
           }
           dishDiv.style.padding = "5px";
@@ -354,7 +354,7 @@
         newQty = 1;
         addOrderRow(dish, 1, "");
       }
-      element.innerText = dish.name + "×" + newQty;
+      element.innerText = dish.name + "×" + newQty + " - " + dish.price + "元";
       element.style.color = "red";
       calculateTotal();
     }
