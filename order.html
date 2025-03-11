@@ -108,7 +108,9 @@
 </head>
 <body>
   <br>
-  <img src="3.png" alt="圖片">
+  <!-- 原本的圖片（狀態視窗中的圖片位置保持不變） -->
+  
+  <!-- (原本位於上方的語音點餐按鈕區已移除) -->
   
   <!-- 訂單明細 -->
   <section>
@@ -129,7 +131,7 @@
     <p id="totalAmount">總金額：0 元</p>
   </section>
   
-  <!-- 控制按鈕：將語音輸入與重置餐點按鈕放到表格下方 -->
+  <!-- 新增控制按鈕區：將按鈕移至表格下方 -->
   <section id="controlButtons">
     <button onclick="startContinuousVoiceInput()">語音輸入</button>
     <button onclick="resetOrder()">重置餐點</button>
@@ -159,6 +161,7 @@
   <!-- 彈出式狀態視窗（語音輸入） -->
   <div id="statusModal">
     <div id="statusModalContent">
+      <!-- 保留狀態視窗圖片（3.png），位置不改動 -->
       <img src="3.png" alt="圖片" style="width:100%;"><br><br>
       <p id="statusText">目前狀態：等待輸入<br>結束點餐請說：完成</p>
       <button onclick="completeOrder()">完成點餐</button>
