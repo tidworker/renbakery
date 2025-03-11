@@ -11,7 +11,7 @@
       margin: 10px; 
       padding: 0; 
       background-color: #f0f8ff; /* 淡藍背景 */
-      text-align: center; /* 所有物件水平置中 */
+      text-align: center;
     }
     /* 按鈕樣式：藍色系 */
     button { 
@@ -28,13 +28,12 @@
     button:hover {
       background-color: #0056b3;
     }
-    
-    /* 表格樣式：藍色系邊框與表頭 */
+    /* 表格樣式 */
     table { 
       border-collapse: separate;
       border-spacing: 0;
-      width: 90%; /* 表格寬度 */
-      margin: 10px auto; /* 水平置中 */
+      width: 90%; 
+      margin: 10px auto;
       background-color: #ffffff;
       color: #333;
       border: 1px solid #007BFF;
@@ -53,19 +52,16 @@
       background-color: #007BFF; 
       color: #fff; 
     }
-    
     /* 總金額文字 */
     #totalAmount {
       color: #333;
       font-size: 18px;
       margin-top: 10px;
     }
-    
     @media (max-width: 600px) { 
       button { font-size: 18px; } 
     }
-    
-    /* 模態框：編輯訂單項目（初始隱藏） */
+    /* 模態框樣式 */
     #editModal {
       display: none;
       position: fixed;
@@ -78,17 +74,15 @@
       margin: 10% auto;
       padding: 20px;
       width: 300px;
-      position: relative;
       border-radius: 5px;
+      position: relative;
     }
-    
-    /* 彈出式狀態視窗（語音輸入，初始隱藏） */
+    /* 語音輸入狀態視窗 */
     #statusModal {
       display: none;
       position: fixed;
       top: 0; left: 0;
-      width: 100%;
-      height: 100%;
+      width: 100%; height: 100%;
       background: rgba(0, 0, 0, 0.5);
       z-index: 2000;
     }
@@ -106,16 +100,12 @@
   <br>
   <!-- 語音點餐區 -->
   <section>
-    <br>
-    <!-- 語音輸入按鈕（改為文字） -->
     <button onclick="startContinuousVoiceInput()">語音輸入</button>
-    <!-- 重製餐點按鈕（改為文字） -->
     <button onclick="resetOrder()">重置餐點</button>
   </section>
   
   <!-- 訂單明細 -->
   <section>
-    <br>
     <table id="orderTable">
       <thead>
         <tr>
@@ -135,8 +125,8 @@
   <!-- 隱藏系統狀態（除錯用） -->
   <section style="display:none;">
     <h2>系統狀態</h2>
-    <p id="dbStatus">尚未載入字庫資料...</p>
-    <p id="menuStatus">尚未載入菜單資料...</p>
+    <p id="dbStatus">字庫載入中…</p>
+    <p id="menuStatus">菜單載入中…</p>
   </section>
   
   <!-- 模態框：編輯訂單項目 -->
@@ -153,10 +143,9 @@
     </div>
   </div>
   
-  <!-- 彈出式狀態視窗（語音輸入） -->
+  <!-- 語音輸入狀態視窗 -->
   <div id="statusModal">
     <div id="statusModalContent">
-      <!-- 保留狀態視窗圖片（3.png） -->
       <img src="3.png" alt="圖片" style="width:100%;"><br><br>
       <p id="statusText">目前狀態：等待輸入<br>結束點餐請說：完成</p>
       <button onclick="completeOrder()">完成點餐</button>
@@ -164,20 +153,27 @@
   </div>
   
   <script>
-    // 全域變數：字庫、菜單與編輯用變數
+    /*********************
+     * 全域變數設定區 *
+     *********************/
     let charMapping = {};
     let groupMapping = {};
+    let providedNumMap = {};   // 依據 groupMapping 建立之數字映射
+    let numeralSet = new Set(); // 數字字元集合
     let currentEditRow = null;
     let orderingComplete = false;
     let currentRecognition = null;
     
+    // 預設菜單（可由外部載入或自行修改）
     let menu = [
       { "keywords": ["chonyobin", "bujiadan", "bujia"], "name": "蔥油餅", "price": 20 },
       { "keywords": ["chonyobinjiadan", "danbin", "jiadan", "la"], "name": "蔥油餅加蛋", "price": 30 },
       { "keywords": ["la"], "name": "辣", "price": 0 }
     ];
     
-    // 載入字庫資料
+    /*********************
+     * 載入外部字庫資料 *
+     *********************/
     function loadTranslationDatabase() {
       fetch("database.txt")
         .then(response => {
@@ -191,8 +187,18 @@
             if (db.groupMapping) {
               groupMapping = db.groupMapping;
               document.getElementById("dbStatus").innerText = "字庫及群組資料載入成功！";
+              // 根據 groupMapping 中代表數字的鍵建立數字映射
+              providedNumMap = {};
+              ["0","1","2","3","4","5","6","7","8","9","10"].forEach(key => {
+                if (groupMapping[key]) {
+                  groupMapping[key].forEach(ch => {
+                    providedNumMap[ch] = parseInt(key);
+                  });
+                }
+              });
+              numeralSet = new Set(Object.keys(providedNumMap));
             } else {
-              document.getElementById("dbStatus").innerText = "字庫資料載入成功！（未包含群組資料）";
+              document.getElementById("dbStatus").innerText = "字庫載入成功！（未包含群組資料）";
             }
           } else {
             document.getElementById("dbStatus").innerText = "database.txt 格式不正確！";
@@ -204,50 +210,59 @@
     }
     loadTranslationDatabase();
     
-    // 載入菜單資料
+    /*********************
+     * 菜單資料（可外部載入） *
+     *********************/
     function loadMenu() {
-      fetch("menu.txt")
-        .then(response => {
-          if (!response.ok) throw new Error("無法讀取 menu.txt");
-          return response.text();
-        })
-        .then(text => {
-          menu = JSON.parse(text);
-          document.getElementById("menuStatus").innerText = "菜單資料載入成功！";
-        })
-        .catch(err => {
-          document.getElementById("menuStatus").innerText = "載入菜單資料失敗：" + err.message;
-        });
+      // 如有外部菜單檔案，可使用 fetch，此處直接使用內部 menu 陣列
+      document.getElementById("menuStatus").innerText = "菜單資料載入成功！";
     }
     loadMenu();
     
-    /* --- 中文數字轉換整合 --- */
-    // 輔助函式：將中文數字字串轉成數值（僅支援到99）
+    /***********************************************
+     * 中文數字轉換：支援「十」、「十三」、「二十」、「二十三」等 *
+     ***********************************************/
     function chineseToNumber(chineseStr) {
-      const numMap = { "零": 0, "一": 1, "二": 2, "兩": 2, "三": 3, "四": 4, "五": 5, "六": 6, "七": 7, "八": 8, "九": 9 };
+      // 若僅單一字，直接回傳對應數字（例如 "五" 或 "武"）
+      if (chineseStr.length === 1) {
+        return providedNumMap[chineseStr] !== undefined ? providedNumMap[chineseStr] : 0;
+      }
+      // 尋找第一個數值為 10 的字元（例如 "十"）
+      let indexOfTen = chineseStr.indexOf("十");
+      // 若未出現 "十"，則各位數拼接後轉換（例："一二" → 12，但此情形較少見）
+      if (indexOfTen === -1) {
+        let numStr = "";
+        for (let ch of chineseStr) {
+          if (providedNumMap[ch] !== undefined) {
+            numStr += providedNumMap[ch].toString();
+          }
+        }
+        return parseInt(numStr);
+      }
+      // 若字串只有 "十"
       if (chineseStr === "十") return 10;
-      if (chineseStr.startsWith("十")) {
-        let ones = chineseStr.length > 1 ? numMap[chineseStr.charAt(1)] : 0;
+      // "十" 在字首（例如 "十三" → 10 + 3）
+      if (indexOfTen === 0) {
+        let ones = chineseStr.length > 1 ? providedNumMap[chineseStr.charAt(1)] || 0 : 0;
         return 10 + ones;
       }
-      if (chineseStr.endsWith("十")) {
-        let tens = numMap[chineseStr.charAt(0)];
+      // "十" 在字尾（例如 "二十" → 2 × 10）
+      if (indexOfTen === chineseStr.length - 1) {
+        let tens = providedNumMap[chineseStr.charAt(0)] || 0;
         return tens * 10;
       }
-      let index = chineseStr.indexOf("十");
-      if (index > 0) {
-        let tens = numMap[chineseStr.charAt(0)];
-        let ones = chineseStr.length > index + 1 ? numMap[chineseStr.charAt(index + 1)] : 0;
-        return tens * 10 + ones;
-      }
-      return numMap[chineseStr] !== undefined ? numMap[chineseStr] : parseInt(chineseStr);
+      // "十" 在中間（例如 "二十三" → 2 × 10 + 3）
+      let tens = providedNumMap[chineseStr.charAt(0)] || 0;
+      let ones = providedNumMap[chineseStr.charAt(indexOfTen + 1)] || 0;
+      return tens * 10 + ones;
     }
     
-    // 修改後的轉譯函式：對連續的中文數字進行正確處理
+    /*************************************************
+     * 轉譯函式：先將連續數字字元轉換，再以 charMapping 轉換其他字元 *
+     *************************************************/
     function translateDishName(dishChinese) {
       let converted = "";
       let numeralBuffer = "";
-      const numeralSet = new Set(["零","一","二","兩","三","四","五","六","七","八","九","十"]);
       for (let i = 0; i < dishChinese.length; i++) {
         let ch = dishChinese.charAt(i);
         if (numeralSet.has(ch)) {
@@ -270,7 +285,9 @@
       return converted;
     }
     
-    /* --- 語音輸入處理 --- */
+    /***********************
+     * 以下保持語音點餐及訂單流程 *
+     ***********************/
     function processMultipleVoiceInput(inputText) {
       let converted = translateDishName(inputText);
       let tokens = converted.split('/').filter(token => token.trim() !== "");
@@ -299,7 +316,6 @@
       return orders.filter(o => o.dish);
     }
     
-    /* --- 自動更新總金額 --- */
     function updateTotalAmount() {
       const tbody = document.getElementById("orderTable").getElementsByTagName("tbody")[0];
       let total = 0;
@@ -313,7 +329,6 @@
       document.getElementById("totalAmount").innerText = "總金額：" + total + " 元";
     }
     
-    /* --- 新增訂單項目 --- */
     function addOrderRow(dish, quantity, remark) {
       if (dish.price === 0) {
         const tbody = document.getElementById("orderTable").getElementsByTagName("tbody")[0];
@@ -371,7 +386,6 @@
       orderingComplete = false;
     }
     
-    /* --- 模態框：編輯訂單項目 --- */
     function openModal(row) {
       currentEditRow = row;
       document.getElementById("modalDishName").innerText = row.cells[0].innerText;
@@ -402,7 +416,6 @@
       updateStatusText();
     }
     
-    /* --- 語音輸入流程 --- */
     function startContinuousVoiceInput() {
       orderingComplete = false;
       document.getElementById("statusModal").style.display = "block";
