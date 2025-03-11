@@ -5,59 +5,66 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>中文點餐系統</title>
   <style>
+    /* 整體背景與字型 */
     body { 
       font-family: Arial, sans-serif; 
       margin: 10px; 
       padding: 0; 
-      background-color: white; 
+      background-color: #f0f8ff; /* 淡藍背景 */
       text-align: center; /* 所有物件水平置中 */
     }
-    /* 將按鈕改為無預設背景與邊框，方便以圖片呈現 */
+    /* 按鈕樣式：藍色系 */
     button { 
       margin: 5px; 
-      padding: 10px; 
+      padding: 10px 20px; 
       font-size: 16px; 
-      background: none; 
-      border: none; 
+      background-color: #007BFF;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
     }
-    /* 圖片點擊時動態調整透明度 */
-    button img {
-      transition: opacity 0.3s ease;
+    button:hover {
+      background-color: #0056b3;
     }
-    button:active img {
-      opacity: 0.5;
-    }
-    /* 表格：黑底、黑色框線、白色文字、3px圓角，並置中 */
+    
+    /* 表格樣式：藍色系邊框與表頭 */
     table { 
       border-collapse: separate;
       border-spacing: 0;
-      width: 89%; /* 表格寬度 */
+      width: 90%; /* 表格寬度 */
       margin: 10px auto; /* 水平置中 */
-      background-color: white;
-      color: black;
-      border: 1px solid black;
-      border-radius: 3px;
+      background-color: #ffffff;
+      color: #333;
+      border: 1px solid #007BFF;
+      border-radius: 5px;
       overflow: hidden;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     }
     table, th, td { 
-      border: 1px solid black; 
+      border: 1px solid #007BFF; 
     }
     th, td { 
-      padding: 8px; 
+      padding: 12px; 
       text-align: left; 
     }
-    /* 將表格標題欄位改成橘色底、黑色文字 */
     table th { 
-      background-color: black; 
-      color: white; 
+      background-color: #007BFF; 
+      color: #fff; 
     }
-    /* 總金額文字用白色 */
+    
+    /* 總金額文字 */
     #totalAmount {
-      color: black;
+      color: #333;
+      font-size: 18px;
+      margin-top: 10px;
     }
+    
     @media (max-width: 600px) { 
       button { font-size: 18px; } 
     }
+    
     /* 模態框：編輯訂單項目（初始隱藏） */
     #editModal {
       display: none;
@@ -72,7 +79,9 @@
       padding: 20px;
       width: 300px;
       position: relative;
+      border-radius: 5px;
     }
+    
     /* 彈出式狀態視窗（語音輸入，初始隱藏） */
     #statusModal {
       display: none;
@@ -86,27 +95,22 @@
     #statusModalContent {
       background: #fff;
       width: 300px;
-      margin: 0% auto;
+      margin: 10% auto;
       padding: 20px;
       text-align: center;
+      border-radius: 5px;
     }
   </style>
 </head>
 <body>
   <br>
-  <!-- 刪除首頁的 3.png 圖片 -->
-  
   <!-- 語音點餐區 -->
   <section>
     <br>
-    <!-- 語音輸入按鈕改為 1.png -->
-    <button onclick="startContinuousVoiceInput()">
-      <img src="1.png" alt="語音輸入" style="height:40px;">
-    </button>
-    <!-- 重製餐點按鈕改為 2.png -->
-    <button onclick="resetOrder()">
-      <img src="2.png" alt="重置餐點" style="height:40px;">
-    </button>
+    <!-- 語音輸入按鈕（改為文字） -->
+    <button onclick="startContinuousVoiceInput()">語音輸入</button>
+    <!-- 重製餐點按鈕（改為文字） -->
+    <button onclick="resetOrder()">重置餐點</button>
   </section>
   
   <!-- 訂單明細 -->
@@ -152,7 +156,7 @@
   <!-- 彈出式狀態視窗（語音輸入） -->
   <div id="statusModal">
     <div id="statusModalContent">
-      <!-- 新增 3.png 圖片 -->
+      <!-- 保留狀態視窗圖片（3.png） -->
       <img src="3.png" alt="圖片" style="width:100%;"><br><br>
       <p id="statusText">目前狀態：等待輸入<br>結束點餐請說：完成</p>
       <button onclick="completeOrder()">完成點餐</button>
