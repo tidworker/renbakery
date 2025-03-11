@@ -28,6 +28,10 @@
     button:hover {
       background-color: #0056b3;
     }
+    /* 點擊後變色效果 */
+    button.clicked {
+      background-color: #0056b3 !important;
+    }
     
     /* 表格樣式：藍色系邊框與表頭 */
     table { 
@@ -104,14 +108,7 @@
 </head>
 <body>
   <br>
-  <!-- 語音點餐區 -->
-  <section>
-    <br>
-    <!-- 語音輸入按鈕（改為文字） -->
-    <button onclick="startContinuousVoiceInput()">語音輸入</button>
-    <!-- 重製餐點按鈕（改為文字） -->
-    <button onclick="resetOrder()">重置餐點</button>
-  </section>
+  <img src="3.png" alt="圖片">
   
   <!-- 訂單明細 -->
   <section>
@@ -130,6 +127,12 @@
       </tbody>
     </table>
     <p id="totalAmount">總金額：0 元</p>
+  </section>
+  
+  <!-- 控制按鈕：將語音輸入與重置餐點按鈕放到表格下方 -->
+  <section id="controlButtons">
+    <button onclick="startContinuousVoiceInput()">語音輸入</button>
+    <button onclick="resetOrder()">重置餐點</button>
   </section>
   
   <!-- 隱藏系統狀態（除錯用） -->
@@ -156,7 +159,6 @@
   <!-- 彈出式狀態視窗（語音輸入） -->
   <div id="statusModal">
     <div id="statusModalContent">
-      <!-- 保留狀態視窗圖片（3.png） -->
       <img src="3.png" alt="圖片" style="width:100%;"><br><br>
       <p id="statusText">目前狀態：等待輸入<br>結束點餐請說：完成</p>
       <button onclick="completeOrder()">完成點餐</button>
@@ -164,7 +166,7 @@
   </div>
   
   <script>
-    // 全域變數：字庫、菜單與編輯用變數
+    // 全域變數：字庫、菜單與編輯用變數（運算邏輯保持不變）
     let charMapping = {};
     let groupMapping = {};
     let currentEditRow = null;
@@ -470,6 +472,19 @@
       }
       document.getElementById("statusModal").style.display = "none";
     }
+    
+    // --- 按鈕點擊效果：僅針對 #controlButtons 區塊下的按鈕 ---
+    document.addEventListener("DOMContentLoaded", function() {
+      const controlButtons = document.querySelectorAll("#controlButtons button");
+      controlButtons.forEach(btn => {
+        btn.addEventListener("click", function() {
+          this.classList.add("clicked");
+          setTimeout(() => {
+            this.classList.remove("clicked");
+          }, 500);
+        });
+      });
+    });
   </script>
 </body>
 </html>
