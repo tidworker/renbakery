@@ -5,61 +5,67 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>中文點餐系統</title>
   <style>
-    /* 白底黑字 */
+    /* 整體背景與字型 */
     body { 
       font-family: Arial, sans-serif; 
       margin: 10px; 
       padding: 0; 
-      background-color: white; 
-      color: black;
-      text-align: center;
+      background-color: #f0f8ff; /* 淡藍背景 */
+      text-align: center; /* 所有物件水平置中 */
     }
-    /* 按鈕（使用圖片呈現） */
+    /* 按鈕樣式：藍色系 */
     button { 
       margin: 5px; 
-      padding: 10px; 
+      padding: 10px 20px; 
       font-size: 16px; 
-      background: none; 
-      border: none; 
+      background-color: #007BFF;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
     }
-    button img {
-      transition: opacity 0.3s ease;
+    button:hover {
+      background-color: #0056b3;
     }
-    button:active img {
-      opacity: 0.5;
-    }
-    /* 表格：白底、黑色框線、3px 圓角 */
+    
+    /* 表格樣式：藍色系邊框與表頭 */
     table { 
       border-collapse: separate;
       border-spacing: 0;
-      width: 89%; 
-      margin: 10px auto; 
-      background-color: white;
-      color: black;
-      border: 1px solid black;
-      border-radius: 3px;
+      width: 90%; /* 表格寬度 */
+      margin: 10px auto; /* 水平置中 */
+      background-color: #ffffff;
+      color: #333;
+      border: 1px solid #007BFF;
+      border-radius: 5px;
       overflow: hidden;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     }
     table, th, td { 
-      border: 1px solid black; 
+      border: 1px solid #007BFF; 
     }
     th, td { 
-      padding: 8px; 
+      padding: 12px; 
       text-align: left; 
     }
-    /* 表頭：橘色底、黑色文字 */
     table th { 
-      background-color: orange; 
-      color: black; 
+      background-color: #007BFF; 
+      color: #fff; 
     }
+    
     /* 總金額文字 */
     #totalAmount {
-      color: black;
+      color: #333;
+      font-size: 18px;
+      margin-top: 10px;
     }
+    
     @media (max-width: 600px) { 
       button { font-size: 18px; } 
     }
-    /* 模態框：編輯訂單項目 */
+    
+    /* 模態框：編輯訂單項目（初始隱藏） */
     #editModal {
       display: none;
       position: fixed;
@@ -73,12 +79,14 @@
       padding: 20px;
       width: 300px;
       position: relative;
+      border-radius: 5px;
     }
-    /* 狀態視窗（語音輸入） */
+    
+    /* 彈出式狀態視窗（語音輸入，初始隱藏） */
     #statusModal {
       display: none;
       position: fixed;
-      top: 239px; left: 0;
+      top: 0; left: 0;
       width: 100%;
       height: 100%;
       background: rgba(0, 0, 0, 0.5);
@@ -87,41 +95,22 @@
     #statusModalContent {
       background: #fff;
       width: 300px;
-      margin: 0 auto;
+      margin: 10% auto;
       padding: 20px;
       text-align: center;
-    }
-    /* 除錯用：顯示原始語音輸入與轉譯後內容 */
-    #originalOutput, #translatedOutput {
-      margin: 10px auto;
-      width: 80%;
-      padding: 8px;
-      border: 1px solid #ccc;
-      background-color: #f9f9f9;
-      text-align: left;
-      font-size: 14px;
+      border-radius: 5px;
     }
   </style>
 </head>
 <body>
   <br>
-  <img src="3.png" alt="圖片">
-  
   <!-- 語音點餐區 -->
   <section>
     <br>
-    <button onclick="startContinuousVoiceInput()">
-      <img src="1.png" alt="語音輸入" style="height:40px;">
-    </button>
-    <button onclick="resetOrder()">
-      <img src="2.png" alt="重置餐點" style="height:40px;">
-    </button>
-  </section>
-  
-  <!-- 除錯區：同時顯示原始中文語音輸入與轉譯後內容 -->
-  <section>
-    <div id="originalOutput">原始輸入：</div>
-    <div id="translatedOutput">轉譯後內容：</div>
+    <!-- 語音輸入按鈕（改為文字） -->
+    <button onclick="startContinuousVoiceInput()">語音輸入</button>
+    <!-- 重製餐點按鈕（改為文字） -->
+    <button onclick="resetOrder()">重置餐點</button>
   </section>
   
   <!-- 訂單明細 -->
@@ -167,13 +156,15 @@
   <!-- 彈出式狀態視窗（語音輸入） -->
   <div id="statusModal">
     <div id="statusModalContent">
+      <!-- 保留狀態視窗圖片（3.png） -->
+      <img src="3.png" alt="圖片" style="width:100%;"><br><br>
       <p id="statusText">目前狀態：等待輸入<br>結束點餐請說：完成</p>
       <button onclick="completeOrder()">完成點餐</button>
     </div>
   </div>
   
   <script>
-    // 全域變數：字庫、菜單與編輯用變數（運算邏輯保持不變）
+    // 全域變數：字庫、菜單與編輯用變數
     let charMapping = {};
     let groupMapping = {};
     let currentEditRow = null;
@@ -186,7 +177,6 @@
       { "keywords": ["la"], "name": "辣", "price": 0 }
     ];
     
-    // 載入外部字庫資料
     function loadTranslationDatabase() {
       fetch("database.txt")
         .then(response => {
@@ -201,7 +191,7 @@
               groupMapping = db.groupMapping;
               document.getElementById("dbStatus").innerText = "字庫及群組資料載入成功！";
             } else {
-              document.getElementById("dbStatus").innerText = "字庫載入成功！（未包含群組資料）";
+              document.getElementById("dbStatus").innerText = "字庫資料載入成功！（未包含群組資料）";
             }
           } else {
             document.getElementById("dbStatus").innerText = "database.txt 格式不正確！";
@@ -213,7 +203,6 @@
     }
     loadTranslationDatabase();
     
-    // 載入菜單資料
     function loadMenu() {
       fetch("menu.txt")
         .then(response => {
@@ -230,7 +219,7 @@
     }
     loadMenu();
     
-    // 轉譯邏輯（保持不變）
+    // 轉譯邏輯：僅輸出 database.txt 中有對應的字元
     function translateDishName(dishChinese) {
       let converted = "";
       for (let i = 0; i < dishChinese.length; i++) {
@@ -244,12 +233,8 @@
     
     /* ---------- 語音輸入處理 ---------- */
     function processMultipleVoiceInput(inputText) {
-      // 顯示原始中文輸入與轉譯後內容
-      let translated = translateDishName(inputText);
-      document.getElementById("originalOutput").innerText = "原始輸入：" + inputText;
-      document.getElementById("translatedOutput").innerText = "轉譯後內容：" + translated;
-      
-      let tokens = translated.split('/').filter(token => token.trim() !== "");
+      let converted = translateDishName(inputText);
+      let tokens = converted.split('/').filter(token => token.trim() !== "");
       let numbers = [];
       let dishes = [];
       tokens.forEach(token => {
