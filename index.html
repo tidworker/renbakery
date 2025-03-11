@@ -17,13 +17,20 @@
       margin: 20px auto;
       max-width: 80%;
     }
+    /* 內嵌頁框 */
+    iframe {
+      width: 100%;
+      height: 60vh; /* 可依需求調整高度 */
+      border: none;
+      margin: 0; /* 確保與其他元素無間距 */
+    }
     /* 輪播圖片區 */
     .carousel {
       width: 100%;
       height: 300px;
       position: relative;
       overflow: hidden;
-      /* 已移除 margin-bottom */
+      margin: 0; /* 移除間距 */
     }
     .carousel img {
       width: 100%;
@@ -39,15 +46,6 @@
     .carousel img.active {
       opacity: 1;
     }
-    /* 內嵌頁框 */
-    iframe {
-      width: 100%;
-      height: 60vh; /* 可依需求調整高度 */
-      border: none;
-      /* 若需要 iframe 與輪播無縫連接，可確保無 margin-top */
-      margin-top: 0;
-      margin-bottom: 20px;
-    }
     /* 下方Logo2 */
     .logo2 {
       display: block;
@@ -60,6 +58,9 @@
   <!-- 最上方Logo -->
   <img src="logo.png" alt="Logo" class="logo">
 
+  <!-- 內嵌頁框 -->
+  <iframe src="order.html" title="Order"></iframe>
+
   <!-- 輪播圖片區 -->
   <div class="carousel">
     <!-- 請依需要替換為實際的圖片 -->
@@ -67,9 +68,6 @@
     <img src="carousel2.jpg" alt="輪播圖片 2">
     <img src="carousel3.jpg" alt="輪播圖片 3">
   </div>
-
-  <!-- 內嵌頁框 -->
-  <iframe src="order.html" title="Order"></iframe>
 
   <!-- 最下方Logo2 -->
   <img src="logo2.png" alt="Logo2" class="logo2">
