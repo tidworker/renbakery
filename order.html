@@ -177,6 +177,7 @@
       { "keywords": ["la"], "name": "辣", "price": 0 }
     ];
     
+    // 載入字庫資料
     function loadTranslationDatabase() {
       fetch("database.txt")
         .then(response => {
@@ -203,6 +204,7 @@
     }
     loadTranslationDatabase();
     
+    // 載入菜單資料
     function loadMenu() {
       fetch("menu.txt")
         .then(response => {
@@ -219,19 +221,56 @@
     }
     loadMenu();
     
-    // 轉譯邏輯：僅輸出 database.txt 中有對應的字元
+    /* --- 中文數字轉換整合 --- */
+    // 輔助函式：將中文數字字串轉成數值（僅支援到99）
+    function chineseToNumber(chineseStr) {
+      const numMap = { "零": 0, "一": 1, "二": 2, "兩": 2, "三": 3, "四": 4, "五": 5, "六": 6, "七": 7, "八": 8, "九": 9 };
+      if (chineseStr === "十") return 10;
+      if (chineseStr.startsWith("十")) {
+        let ones = chineseStr.length > 1 ? numMap[chineseStr.charAt(1)] : 0;
+        return 10 + ones;
+      }
+      if (chineseStr.endsWith("十")) {
+        let tens = numMap[chineseStr.charAt(0)];
+        return tens * 10;
+      }
+      let index = chineseStr.indexOf("十");
+      if (index > 0) {
+        let tens = numMap[chineseStr.charAt(0)];
+        let ones = chineseStr.length > index + 1 ? numMap[chineseStr.charAt(index + 1)] : 0;
+        return tens * 10 + ones;
+      }
+      return numMap[chineseStr] !== undefined ? numMap[chineseStr] : parseInt(chineseStr);
+    }
+    
+    // 修改後的轉譯函式：對連續的中文數字進行正確處理
     function translateDishName(dishChinese) {
       let converted = "";
+      let numeralBuffer = "";
+      const numeralSet = new Set(["零","一","二","兩","三","四","五","六","七","八","九","十"]);
       for (let i = 0; i < dishChinese.length; i++) {
-        const ch = dishChinese.charAt(i);
-        if (charMapping[ch] !== undefined) {
-          converted += charMapping[ch];
+        let ch = dishChinese.charAt(i);
+        if (numeralSet.has(ch)) {
+          numeralBuffer += ch;
+        } else {
+          if (numeralBuffer.length > 0) {
+            let numVal = chineseToNumber(numeralBuffer);
+            converted += numVal.toString();
+            numeralBuffer = "";
+          }
+          if (charMapping[ch] !== undefined) {
+            converted += charMapping[ch];
+          }
         }
+      }
+      if (numeralBuffer.length > 0) {
+        let numVal = chineseToNumber(numeralBuffer);
+        converted += numVal.toString();
       }
       return converted;
     }
     
-    /* ---------- 語音輸入處理 ---------- */
+    /* --- 語音輸入處理 --- */
     function processMultipleVoiceInput(inputText) {
       let converted = translateDishName(inputText);
       let tokens = converted.split('/').filter(token => token.trim() !== "");
@@ -260,7 +299,7 @@
       return orders.filter(o => o.dish);
     }
     
-    /* ---------- 自動更新總金額 ---------- */
+    /* --- 自動更新總金額 --- */
     function updateTotalAmount() {
       const tbody = document.getElementById("orderTable").getElementsByTagName("tbody")[0];
       let total = 0;
@@ -274,7 +313,7 @@
       document.getElementById("totalAmount").innerText = "總金額：" + total + " 元";
     }
     
-    /* ---------- 新增訂單項目 ---------- */
+    /* --- 新增訂單項目 --- */
     function addOrderRow(dish, quantity, remark) {
       if (dish.price === 0) {
         const tbody = document.getElementById("orderTable").getElementsByTagName("tbody")[0];
@@ -332,7 +371,7 @@
       orderingComplete = false;
     }
     
-    /* ---------- 模態框：編輯訂單項目 ---------- */
+    /* --- 模態框：編輯訂單項目 --- */
     function openModal(row) {
       currentEditRow = row;
       document.getElementById("modalDishName").innerText = row.cells[0].innerText;
@@ -363,7 +402,7 @@
       updateStatusText();
     }
     
-    /* ---------- 語音輸入流程 ---------- */
+    /* --- 語音輸入流程 --- */
     function startContinuousVoiceInput() {
       orderingComplete = false;
       document.getElementById("statusModal").style.display = "block";
