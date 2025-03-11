@@ -1,516 +1,90 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>中文點餐系統</title>
+  <title>Index Page</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 10px; padding: 0; }
-    input, button { margin: 5px; padding: 10px; font-size: 16px; }
-    table { border-collapse: collapse; width: 100%; margin-top: 10px; }
-    table, th, td { border: 1px solid #aaa; }
-    th, td { padding: 8px; text-align: center; }
-    @media (max-width: 600px) { input, button { font-size: 18px; } }
-    /* 模態框：編輯訂單項目 */
-    #editModal {
-      display: none;
-      position: fixed;
-      left: 0; top: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5);
+    body {
+      margin: 0;
+      background-color: rgb(26,110,238); /* 底色 */
+      font-family: Arial, sans-serif;
+      text-align: center;
     }
-    #editModalContent {
-      background: #fff;
-      margin: 10% auto;
-      padding: 20px;
-      width: 300px;
+    /* 上方Logo置中 */
+    .logo {
+      display: block;
+      margin: 20px auto;
+      max-width: 80%;
+    }
+    /* 輪播圖片區 */
+    .carousel {
+      width: 100%;
+      height: 300px;
       position: relative;
+      overflow: hidden;
+      /* 已移除 margin-bottom */
     }
-    /* 彈出式狀態視窗 */
-    #statusModal {
-      display: none;
-      position: fixed;
-      top: 0; left: 0;
+    .carousel img {
       width: 100%;
       height: 100%;
-      background: rgba(0, 0, 0, 0.5);
-      z-index: 2000;
+      object-fit: cover;        /* 保持比例並裁切 */
+      object-position: center;  /* 顯示中間部分 */
+      position: absolute;
+      top: 0;
+      left: 0;
+      opacity: 0;
+      transition: opacity 1s ease-in-out;
     }
-    #statusModalContent {
-      background: #fff;
-      width: 300px;
-      margin: 20% auto;
-      padding: 20px;
-      text-align: center;
+    .carousel img.active {
+      opacity: 1;
+    }
+    /* 內嵌頁框 */
+    iframe {
+      width: 100%;
+      height: 60vh; /* 可依需求調整高度 */
+      border: none;
+      /* 若需要 iframe 與輪播無縫連接，可確保無 margin-top */
+      margin-top: 0;
+      margin-bottom: 20px;
+    }
+    /* 下方Logo2 */
+    .logo2 {
+      display: block;
+      margin: 20px auto;
+      max-width: 80%;
     }
   </style>
 </head>
 <body>
-  <h1>中文點餐系統</h1>
-  
-  <!-- 點餐區 -->
-  <section>
-    <h2>請輸入訂單內容（或直接使用語音輸入）</h2>
-    <!-- 範例形式：a3/2/b、3/a2/b、a3/b2/、3/a/b2 -->
-    <input type="text" id="orderInput" placeholder="例如：a3/2/b 或 3/a2/b">
-    <button onclick="orderFromChinese()">送出訂單</button>
-    <button onclick="startContinuousVoiceInput()">語音輸入</button>
-    <button onclick="resetOrder()">重置點餐</button>
-    <p id="convertedText">尚未轉譯</p>
-  </section>
-  
-  <!-- 訂單明細 -->
-  <section>
-    <h2>訂單明細</h2>
-    <table id="orderTable">
-      <thead>
-        <tr>
-          <th>菜品</th>
-          <th>份數</th>
-          <th>備註</th>
-          <th>單價</th>
-          <th>總價</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- 訂單項目將動態加入 -->
-      </tbody>
-    </table>
-    <button onclick="calculateTotal()">計算總金額</button>
-    <p id="totalAmount">總金額：0 元</p>
-  </section>
-  
-  <!-- 隱藏系統狀態（除錯用） -->
-  <section style="display:none;">
-    <h2>系統狀態</h2>
-    <p id="dbStatus">尚未載入字庫資料...</p>
-    <p id="menuStatus">尚未載入菜單資料...</p>
-  </section>
-  
-  <!-- 模態框：編輯訂單項目 -->
-  <div id="editModal">
-    <div id="editModalContent">
-      <h3 id="modalDishName">編輯品項</h3>
-      <label for="modalQuantity">份數:</label>
-      <input type="number" id="modalQuantity" min="1" style="width:100%;">
-      <div style="margin-top:10px;">
-        <button onclick="saveModal()">儲存</button>
-        <button onclick="deleteModal()">刪除</button>
-        <button onclick="closeModal()">取消</button>
-      </div>
-    </div>
+  <!-- 最上方Logo -->
+  <img src="logo.png" alt="Logo" class="logo">
+
+  <!-- 輪播圖片區 -->
+  <div class="carousel">
+    <!-- 請依需要替換為實際的圖片 -->
+    <img src="carousel1.jpg" alt="輪播圖片 1" class="active">
+    <img src="carousel2.jpg" alt="輪播圖片 2">
+    <img src="carousel3.jpg" alt="輪播圖片 3">
   </div>
-  
-  <!-- 彈出式狀態視窗（語音輸入） -->
-  <div id="statusModal">
-    <div id="statusModalContent">
-      <p id="statusText">目前狀態：等待輸入<br>結束點餐請說：完成</p>
-      <!-- 新增「完成點餐」按鈕 -->
-      <button onclick="completeOrder()">完成點餐</button>
-    </div>
-  </div>
-  
+
+  <!-- 內嵌頁框 -->
+  <iframe src="order.html" title="Order"></iframe>
+
+  <!-- 最下方Logo2 -->
+  <img src="logo2.png" alt="Logo2" class="logo2">
+
   <script>
-    // 全域變數：字庫、菜單與編輯用變數（原有載入方式不變）
-    let charMapping = {};
-    let groupMapping = {};
-    let currentEditRow = null;
-    // 設定點餐是否完成的旗標，初始為 false
-    let orderingComplete = false;
-    let menu = [
-      { "keywords": ["chonyobin", "bujiadan", "bujia"], "name": "蔥油餅", "price": 20 },
-      { "keywords": ["chonyobinjiadan", "danbin", "jiadan", "la"], "name": "蔥油餅加蛋", "price": 30 },
-      { "keywords": ["la"], "name": "辣", "price": 0 }
-    ];
+    // 輪播圖片自動循環切換
+    let current = 0;
+    const images = document.querySelectorAll('.carousel img');
+    const total = images.length;
     
-    function loadTranslationDatabase() {
-      fetch("database.txt")
-        .then(response => {
-          if (!response.ok) throw new Error("無法讀取 database.txt");
-          return response.text();
-        })
-        .then(text => {
-          const db = JSON.parse(text);
-          if (db.charMapping) {
-            charMapping = db.charMapping;
-            if (db.groupMapping) {
-              groupMapping = db.groupMapping;
-              document.getElementById("dbStatus").innerText = "字庫及群組資料載入成功！";
-            } else {
-              document.getElementById("dbStatus").innerText = "字庫資料載入成功！（未包含群組資料）";
-            }
-          } else {
-            document.getElementById("dbStatus").innerText = "database.txt 格式不正確！";
-          }
-        })
-        .catch(err => {
-          document.getElementById("dbStatus").innerText = "載入字庫資料失敗：" + err.message;
-        });
-    }
-    loadTranslationDatabase();
-    
-    function loadMenu() {
-      fetch("menu.txt")
-        .then(response => {
-          if (!response.ok) throw new Error("無法讀取 menu.txt");
-          return response.text();
-        })
-        .then(text => {
-          menu = JSON.parse(text);
-          document.getElementById("menuStatus").innerText = "菜單資料載入成功！";
-        })
-        .catch(err => {
-          document.getElementById("menuStatus").innerText = "載入菜單資料失敗：" + err.message;
-        });
-    }
-    loadMenu();
-    
-    // 原有轉譯邏輯：依據 charMapping 轉換中文字
-    function translateDishName(dishChinese) {
-      let converted = "";
-      for (let i = 0; i < dishChinese.length; i++) {
-        const ch = dishChinese.charAt(i);
-        if (charMapping[ch] !== undefined) {
-          converted += charMapping[ch];
-        } else {
-          converted += ch;
-        }
-      }
-      return converted;
-    }
-    
-    /* ---------- 手動輸入處理 ---------- */
-    function orderFromChinese() {
-      const inputElem = document.getElementById("orderInput");
-      const inputText = inputElem.value.trim();
-      if (!inputText) {
-        alert("請輸入訂單內容！");
-        return;
-      }
-      const translatedText = translateDishName(inputText);
-      document.getElementById("convertedText").innerText = "轉譯結果：" + translatedText;
-      
-      // 以斜線分割 token（忽略空字串）
-      let tokens = translatedText.split('/').filter(token => token.trim() !== "");
-      
-      // 分別抽取數字與餐點（依 token 出現順序）
-      let numbers = [];
-      let dishes = [];
-      tokens.forEach(token => {
-        let m = token.match(/^(\d+)?([a-zA-Z]+)(\d+)?$/);
-        if (m) {
-          if (m[1]) { numbers.push(parseInt(m[1])); }
-          dishes.push(m[2]);
-          if (m[3]) { numbers.push(parseInt(m[3])); }
-        } else {
-          if (/^\d+$/.test(token)) { numbers.push(parseInt(token)); }
-          else if (/^[a-zA-Z]+$/.test(token)) { dishes.push(token); }
-        }
-      });
-      
-      // 配對：若只有一個數字，則所有餐點均取該數字；若無數字則預設 1；若有多個則依序配對
-      let orders = [];
-      if (dishes.length === 0) {
-        alert("請重新輸入");
-        inputElem.value = "";
-        return;
-      }
-      if (numbers.length === 0) {
-        orders = dishes.map(d => ({ keyword: d, quantity: 1 }));
-      } else if (numbers.length === 1) {
-        orders = dishes.map(d => ({ keyword: d, quantity: numbers[0] }));
-      } else {
-        orders = dishes.map((d, i) => ({ keyword: d, quantity: i < numbers.length ? numbers[i] : 1 }));
-      }
-      
-      // 建立訂單項目（保持原有判定及免費品項處理邏輯）
-      let orderList = [];
-      let firstDish = menu.find(item => item.keywords.includes(orders[0].keyword));
-      if (firstDish && firstDish.price === 0) {
-        alert("請重新輸入");
-        inputElem.value = "";
-        return;
-      }
-      
-      for (let i = 0; i < orders.length; i++) {
-        let order = orders[i];
-        let foundDish = menu.find(item => item.keywords.includes(order.keyword));
-        if (!foundDish) {
-          alert("請重新輸入");
-          inputElem.value = "";
-          return;
-        }
-        if (foundDish.price === 0) {
-          let attached = false;
-          for (let j = orderList.length - 1; j >= 0; j--) {
-            if (orderList[j].dish.price !== 0) {
-              orderList[j].remark = orderList[j].remark 
-                ? orderList[j].remark + ", " + foundDish.name + "×" + order.quantity
-                : foundDish.name + "×" + order.quantity;
-              attached = true;
-              break;
-            }
-          }
-          if (!attached) {
-            alert("請重新輸入");
-            inputElem.value = "";
-            return;
-          }
-        } else {
-          orderList.push({ dish: foundDish, quantity: order.quantity, remark: "" });
-        }
-      }
-      
-      if (orderList.length === 0) {
-        alert("請重新輸入");
-        inputElem.value = "";
-        return;
-      }
-      
-      orderList.forEach(order => {
-        addOrderRow(order.dish, order.quantity, order.remark);
-      });
-      inputElem.value = "";
-      updateStatusText();
-    }
-    
-    /* ---------- 語音輸入處理 ---------- */
-    // 語音輸入解析邏輯與手動輸入相同，均以斜線作為分隔符
-    function processMultipleVoiceInput(inputText) {
-      let converted = translateDishName(inputText);
-      // 與手動輸入保持一致，使用斜線分割
-      let tokens = converted.split('/').filter(token => token.trim() !== "");
-      
-      let numbers = [];
-      let dishes = [];
-      tokens.forEach(token => {
-        let m = token.match(/^(\d+)?([a-zA-Z]+)(\d+)?$/);
-        if (m) {
-          if (m[1]) { numbers.push(parseInt(m[1])); }
-          dishes.push(m[2]);
-          if (m[3]) { numbers.push(parseInt(m[3])); }
-        } else {
-          if (/^\d+$/.test(token)) { numbers.push(parseInt(token)); }
-          else if (/^[a-zA-Z]+$/.test(token)) { dishes.push(token); }
-        }
-      });
-      
-      let orders = [];
-      if (dishes.length === 0) return [];
-      if (numbers.length === 0) {
-        orders = dishes.map(d => ({ dish: menu.find(item => item.keywords.includes(d)), quantity: 1 }));
-      } else if (numbers.length === 1) {
-        orders = dishes.map(d => ({ dish: menu.find(item => item.keywords.includes(d)), quantity: numbers[0] }));
-      } else {
-        orders = dishes.map((d, i) => ({ dish: menu.find(item => item.keywords.includes(d)), quantity: i < numbers.length ? numbers[i] : 1 }));
-      }
-      return orders.filter(o => o.dish);
-    }
-    
-    /* ---------- 新增訂單項目與計算總金額 ---------- */
-    function addOrderRow(dish, quantity, remark) {
-      if (dish.price === 0) {
-        const tbody = document.getElementById("orderTable").getElementsByTagName("tbody")[0];
-        if (tbody.rows.length === 0) {
-          alert("無法加入0元商品，因為沒有上一筆訂單");
-          return;
-        }
-        let found = false;
-        for (let i = tbody.rows.length - 1; i >= 0; i--) {
-          let row = tbody.rows[i];
-          let price = parseFloat(row.cells[3].innerText);
-          if (price > 0) {
-            let currentRemark = row.cells[2].innerText;
-            if (currentRemark && currentRemark.trim() !== "") {
-              let remarksArr = currentRemark.split(',').map(s => s.trim());
-              let index = remarksArr.findIndex(entry => entry.startsWith(dish.name + "×"));
-              if (index >= 0) {
-                let parts = remarksArr[index].split('×');
-                let currentQty = parseInt(parts[1]) || 0;
-                let newQty = currentQty + quantity;
-                remarksArr[index] = dish.name + "×" + newQty;
-              } else {
-                remarksArr.push(dish.name + "×" + quantity);
-              }
-              row.cells[2].innerText = remarksArr.join(", ");
-            } else {
-              row.cells[2].innerText = dish.name + "×" + quantity;
-            }
-            found = true;
-            break;
-          }
-        }
-        if (!found) {
-          alert("無法加入0元商品，因為沒有上一筆非免費訂單");
-        }
-        return;
-      }
-      const tbody = document.getElementById("orderTable").getElementsByTagName("tbody")[0];
-      const row = tbody.insertRow();
-      const nameCell = row.insertCell();
-      nameCell.innerText = dish.name;
-      nameCell.style.cursor = 'pointer';
-      nameCell.onclick = function() { openModal(row); };
-      row.insertCell().innerText = quantity;
-      row.insertCell().innerText = remark;
-      row.insertCell().innerText = dish.price;
-      row.insertCell().innerText = dish.price * quantity;
-    }
-    
-    function calculateTotal() {
-      const tbody = document.getElementById("orderTable").getElementsByTagName("tbody")[0];
-      let total = 0;
-      for (let i = 0; i < tbody.rows.length; i++) {
-        let cellValue = parseFloat(tbody.rows[i].cells[4].innerText);
-        if (!isNaN(cellValue)) total += cellValue;
-      }
-      document.getElementById("totalAmount").innerText = "總金額：" + total + " 元";
-    }
-    
-    function resetOrder() {
-      document.getElementById("orderTable").getElementsByTagName("tbody")[0].innerHTML = "";
-      document.getElementById("convertedText").innerText = "尚未轉譯";
-      document.getElementById("orderInput").value = "";
-      document.getElementById("totalAmount").innerText = "總金額：0 元";
-      document.getElementById("statusModal").style.display = "none";
-      orderingComplete = false;
-    }
-    
-    /* ---------- 模態框：編輯訂單項目 ---------- */
-    function openModal(row) {
-      currentEditRow = row;
-      document.getElementById("modalDishName").innerText = row.cells[0].innerText;
-      document.getElementById("modalQuantity").value = row.cells[1].innerText;
-      document.getElementById("editModal").style.display = "block";
-    }
-    function closeModal() {
-      document.getElementById("editModal").style.display = "none";
-      currentEditRow = null;
-    }
-    function saveModal() {
-      if (!currentEditRow) return;
-      let newQuantity = parseInt(document.getElementById("modalQuantity").value);
-      if (isNaN(newQuantity) || newQuantity < 1) {
-        alert("份數必須大於或等於1");
-        return;
-      }
-      currentEditRow.cells[1].innerText = newQuantity;
-      let price = parseFloat(currentEditRow.cells[3].innerText);
-      currentEditRow.cells[4].innerText = price * newQuantity;
-      closeModal();
-      updateStatusText();
-    }
-    function deleteModal() {
-      if (!currentEditRow) return;
-      currentEditRow.parentNode.removeChild(currentEditRow);
-      closeModal();
-      updateStatusText();
-    }
-    
-    /* ---------- 語音輸入流程 ---------- */
-    function startContinuousVoiceInput() {
-      document.getElementById("orderInput").value = "";
-      document.getElementById("convertedText").innerText = "";
-      orderingComplete = false;
-      const statusModal = document.getElementById("statusModal");
-      statusModal.style.display = "block";
-      document.getElementById("statusText").innerHTML = "目前狀態：等待輸入<br>結束點餐請說：完成";
-      voiceInputLoop();
-    }
-    
-    function updateStatusText() {
-      const tbody = document.getElementById("orderTable").getElementsByTagName("tbody")[0];
-      let summary = "";
-      let counter = 1;
-      for (let i = 0; i < tbody.rows.length; i++) {
-        let row = tbody.rows[i];
-        let dishName = row.cells[0].innerText;
-        let quantity = row.cells[1].innerText;
-        let price = parseFloat(row.cells[3].innerText);
-        if (price >= 0) {
-          summary += counter + ". " + dishName + "×" + quantity + "<br>";
-          counter++;
-          let remark = row.cells[2].innerText;
-          if (remark && remark.trim() !== "") {
-            summary += remark + "<br>";
-          }
-        }
-      }
-      let statusHTML = "目前狀態：等待輸入<br>" + summary + "結束點餐請說：完成";
-      document.getElementById("statusText").innerHTML = statusHTML;
-    }
-    
-    function startVoiceInputSingle() {
-      return new Promise((resolve) => {
-         if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-           alert("您的瀏覽器不支援語音輸入功能。");
-           resolve(null);
-           return;
-         }
-         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-         const recognition = new SpeechRecognition();
-         recognition.lang = 'zh-TW';
-         recognition.interimResults = false;
-         recognition.maxAlternatives = 1;
-         let timeoutId = setTimeout(() => { recognition.abort(); resolve(null); }, 5000);
-         recognition.onresult = function(event) {
-            clearTimeout(timeoutId);
-            resolve(event.results[0][0].transcript);
-         };
-         recognition.onerror = function(event) {
-            clearTimeout(timeoutId);
-            resolve(null);
-         };
-         recognition.start();
-      });
-    }
-    
-    function voiceInputLoop() {
-      if (orderingComplete) return;
-      startVoiceInputSingle().then(transcript => {
-         if (!transcript) {
-            document.getElementById("statusText").innerText = "目前狀態：無輸入，點餐結束";
-            setTimeout(() => { document.getElementById("statusModal").style.display = "none"; }, 1000);
-            return;
-         }
-         transcript = transcript.trim();
-         if (transcript === "完成") {
-            document.getElementById("statusText").innerText = "目前狀態：結束";
-            setTimeout(() => { document.getElementById("statusModal").style.display = "none"; }, 1000);
-            return;
-         }
-         if (transcript === "錯誤") {
-            let tbody = document.getElementById("orderTable").getElementsByTagName("tbody")[0];
-            if (tbody.rows.length > 0) {
-               tbody.deleteRow(tbody.rows.length - 1);
-               document.getElementById("convertedText").innerText = "已刪除最後一筆訂單";
-            } else {
-               document.getElementById("convertedText").innerText = "無可刪除訂單";
-            }
-            updateStatusText();
-            voiceInputLoop();
-            return;
-         }
-         let orders = processMultipleVoiceInput(transcript);
-         if (orders.length === 0) {
-            document.getElementById("statusText").innerHTML = "目前狀態：輸入錯誤，等待輸入<br>結束點餐請說：完成";
-            voiceInputLoop();
-         } else {
-            orders.forEach(order => {
-              addOrderRow(order.dish, order.quantity, "");
-              document.getElementById("convertedText").innerText = "已新增: " + order.dish.name + " " + order.quantity + " 份";
-            });
-            updateStatusText();
-            voiceInputLoop();
-         }
-      });
-    }
-    
-    // 新增完成點餐函式：按下後設定 orderingComplete 為 true 並隱藏狀態視窗
-    function completeOrder() {
-      orderingComplete = true;
-      document.getElementById("statusModal").style.display = "none";
-    }
+    setInterval(() => {
+      images[current].classList.remove('active');
+      current = (current + 1) % total;
+      images[current].classList.add('active');
+    }, 3000); // 每3000毫秒切換一次
   </script>
 </body>
 </html>
