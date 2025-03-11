@@ -9,7 +9,7 @@
       font-family: Arial, sans-serif; 
       margin: 10px; 
       padding: 0; 
-      background-color: black; 
+      background-color: white; 
       text-align: center; /* 所有物件水平置中 */
     }
     /* 將按鈕改為無預設背景與邊框，方便以圖片呈現 */
@@ -94,7 +94,7 @@
 </head>
 <body>
   <br>
-  <img src="3.png" alt="圖片">
+  <!-- 刪除首頁的 3.png 圖片 -->
   
   <!-- 語音點餐區 -->
   <section>
@@ -152,6 +152,8 @@
   <!-- 彈出式狀態視窗（語音輸入） -->
   <div id="statusModal">
     <div id="statusModalContent">
+      <!-- 新增 3.png 圖片 -->
+      <img src="3.png" alt="圖片" style="width:100%;"><br><br>
       <p id="statusText">目前狀態：等待輸入<br>結束點餐請說：完成</p>
       <button onclick="completeOrder()">完成點餐</button>
     </div>
