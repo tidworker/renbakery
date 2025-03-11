@@ -5,14 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>中文點餐系統</title>
   <style>
+    /* 白底黑字 */
     body { 
       font-family: Arial, sans-serif; 
       margin: 10px; 
       padding: 0; 
       background-color: white; 
+      color: black;
       text-align: center; /* 所有物件水平置中 */
     }
-    /* 將按鈕改為無預設背景與邊框，方便以圖片呈現 */
+    /* 按鈕保持原來以圖片呈現 */
     button { 
       margin: 5px; 
       padding: 10px; 
@@ -27,7 +29,7 @@
     button:active img {
       opacity: 0.5;
     }
-    /* 表格：黑底、黑色框線、白色文字、3px圓角，並置中 */
+    /* 表格：白底、黑色框線、黑色文字、3px圓角，並置中 */
     table { 
       border-collapse: separate;
       border-spacing: 0;
@@ -35,12 +37,12 @@
       margin: 10px auto; /* 水平置中 */
       background-color: white;
       color: black;
-      border: 0px solid white;
+      border: 1px solid black;
       border-radius: 3px;
       overflow: hidden;
     }
     table, th, td { 
-      border: 0px solid white; 
+      border: 1px solid black; 
     }
     th, td { 
       padding: 8px; 
@@ -48,10 +50,10 @@
     }
     /* 將表格標題欄位改成橘色底、黑色文字 */
     table th { 
-      background-color: white; 
-      color: white; 
+      background-color: orange; 
+      color: black; 
     }
-    /* 總金額文字用白色 */
+    /* 總金額文字用黑色 */
     #totalAmount {
       color: black;
     }
@@ -90,21 +92,38 @@
       padding: 20px;
       text-align: center;
     }
+    /* 除錯用：顯示轉譯後內容 */
+    #translatedOutput {
+      margin: 10px auto;
+      width: 80%;
+      padding: 8px;
+      border: 1px solid #ccc;
+      background-color: #f9f9f9;
+      text-align: left;
+      font-size: 14px;
+    }
   </style>
 </head>
 <body>
+  <br>
+  <img src="3.png" alt="圖片">
   
   <!-- 語音點餐區 -->
   <section>
     <br>
-    <!-- 語音輸入按鈕改為 1.png -->
+    <!-- 語音輸入按鈕（使用 1.png 圖片） -->
     <button onclick="startContinuousVoiceInput()">
       <img src="1.png" alt="語音輸入" style="height:40px;">
     </button>
-    <!-- 重製餐點按鈕改為 2.png -->
+    <!-- 重製餐點按鈕（使用 2.png 圖片） -->
     <button onclick="resetOrder()">
       <img src="2.png" alt="重置餐點" style="height:40px;">
     </button>
+  </section>
+  
+  <!-- 顯示轉譯後內容（除錯用） -->
+  <section>
+    <div id="translatedOutput">轉譯後內容：</div>
   </section>
   
   <!-- 訂單明細 -->
@@ -156,7 +175,7 @@
   </div>
   
   <script>
-    // 全域變數：字庫、菜單與編輯用變數
+    // 全域變數：字庫、菜單與編輯用變數（運算邏輯保持不變）
     let charMapping = {};
     let groupMapping = {};
     let currentEditRow = null;
@@ -211,7 +230,7 @@
     }
     loadMenu();
     
-    // 轉譯邏輯：僅輸出 database.txt 中有對應的字元
+    // 轉譯邏輯（保持不變）
     function translateDishName(dishChinese) {
       let converted = "";
       for (let i = 0; i < dishChinese.length; i++) {
@@ -225,7 +244,10 @@
     
     /* ---------- 語音輸入處理 ---------- */
     function processMultipleVoiceInput(inputText) {
+      // 呼叫轉譯函式並更新除錯區域顯示轉譯後內容
       let converted = translateDishName(inputText);
+      document.getElementById("translatedOutput").innerText = "轉譯後內容：" + converted;
+      
       let tokens = converted.split('/').filter(token => token.trim() !== "");
       let numbers = [];
       let dishes = [];
