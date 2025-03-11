@@ -12,9 +12,9 @@
       padding: 0; 
       background-color: white; 
       color: black;
-      text-align: center; /* 所有物件水平置中 */
+      text-align: center;
     }
-    /* 按鈕保持原來以圖片呈現 */
+    /* 按鈕（使用圖片呈現） */
     button { 
       margin: 5px; 
       padding: 10px; 
@@ -22,19 +22,18 @@
       background: none; 
       border: none; 
     }
-    /* 圖片點擊時動態調整透明度 */
     button img {
       transition: opacity 0.3s ease;
     }
     button:active img {
       opacity: 0.5;
     }
-    /* 表格：白底、黑色框線、黑色文字、3px圓角，並置中 */
+    /* 表格：白底、黑色框線、3px 圓角 */
     table { 
       border-collapse: separate;
       border-spacing: 0;
-      width: 89%; /* 表格寬度 */
-      margin: 10px auto; /* 水平置中 */
+      width: 89%; 
+      margin: 10px auto; 
       background-color: white;
       color: black;
       border: 1px solid black;
@@ -48,19 +47,19 @@
       padding: 8px; 
       text-align: left; 
     }
-    /* 將表格標題欄位改成橘色底、黑色文字 */
+    /* 表頭：橘色底、黑色文字 */
     table th { 
       background-color: orange; 
       color: black; 
     }
-    /* 總金額文字用黑色 */
+    /* 總金額文字 */
     #totalAmount {
       color: black;
     }
     @media (max-width: 600px) { 
       button { font-size: 18px; } 
     }
-    /* 模態框：編輯訂單項目（初始隱藏） */
+    /* 模態框：編輯訂單項目 */
     #editModal {
       display: none;
       position: fixed;
@@ -75,7 +74,7 @@
       width: 300px;
       position: relative;
     }
-    /* 彈出式狀態視窗（語音輸入，初始隱藏） */
+    /* 狀態視窗（語音輸入） */
     #statusModal {
       display: none;
       position: fixed;
@@ -88,12 +87,12 @@
     #statusModalContent {
       background: #fff;
       width: 300px;
-      margin: 0% auto;
+      margin: 0 auto;
       padding: 20px;
       text-align: center;
     }
-    /* 除錯用：顯示轉譯後內容 */
-    #translatedOutput {
+    /* 除錯用：顯示原始語音輸入與轉譯後內容 */
+    #originalOutput, #translatedOutput {
       margin: 10px auto;
       width: 80%;
       padding: 8px;
@@ -111,18 +110,17 @@
   <!-- 語音點餐區 -->
   <section>
     <br>
-    <!-- 語音輸入按鈕（使用 1.png 圖片） -->
     <button onclick="startContinuousVoiceInput()">
       <img src="1.png" alt="語音輸入" style="height:40px;">
     </button>
-    <!-- 重製餐點按鈕（使用 2.png 圖片） -->
     <button onclick="resetOrder()">
       <img src="2.png" alt="重置餐點" style="height:40px;">
     </button>
   </section>
   
-  <!-- 顯示轉譯後內容（除錯用） -->
+  <!-- 除錯區：同時顯示原始中文語音輸入與轉譯後內容 -->
   <section>
+    <div id="originalOutput">原始輸入：</div>
     <div id="translatedOutput">轉譯後內容：</div>
   </section>
   
@@ -188,6 +186,7 @@
       { "keywords": ["la"], "name": "辣", "price": 0 }
     ];
     
+    // 載入外部字庫資料
     function loadTranslationDatabase() {
       fetch("database.txt")
         .then(response => {
@@ -202,7 +201,7 @@
               groupMapping = db.groupMapping;
               document.getElementById("dbStatus").innerText = "字庫及群組資料載入成功！";
             } else {
-              document.getElementById("dbStatus").innerText = "字庫資料載入成功！（未包含群組資料）";
+              document.getElementById("dbStatus").innerText = "字庫載入成功！（未包含群組資料）";
             }
           } else {
             document.getElementById("dbStatus").innerText = "database.txt 格式不正確！";
@@ -214,6 +213,7 @@
     }
     loadTranslationDatabase();
     
+    // 載入菜單資料
     function loadMenu() {
       fetch("menu.txt")
         .then(response => {
@@ -244,11 +244,12 @@
     
     /* ---------- 語音輸入處理 ---------- */
     function processMultipleVoiceInput(inputText) {
-      // 呼叫轉譯函式並更新除錯區域顯示轉譯後內容
-      let converted = translateDishName(inputText);
-      document.getElementById("translatedOutput").innerText = "轉譯後內容：" + converted;
+      // 顯示原始中文輸入與轉譯後內容
+      let translated = translateDishName(inputText);
+      document.getElementById("originalOutput").innerText = "原始輸入：" + inputText;
+      document.getElementById("translatedOutput").innerText = "轉譯後內容：" + translated;
       
-      let tokens = converted.split('/').filter(token => token.trim() !== "");
+      let tokens = translated.split('/').filter(token => token.trim() !== "");
       let numbers = [];
       let dishes = [];
       tokens.forEach(token => {
